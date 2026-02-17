@@ -31,3 +31,57 @@ logging:
 
 
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: "282387866257-nkoqplsvhptndjn1e8spi3aaio7vkr3g.apps.googleusercontent.com"
+#            client-secret: "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"
+#            scope: profile, email
+#            redirect-uri: http://localhost:8080/login/oauth2/code/google
+#            authorization-grant-type: authorization_code
+#            client-name: Google
+#
+#          facebook:
+#            client-id: ${FACEBOOK_CLIENT_ID}
+#            client-secret: ${FACEBOOK_CLIENT_SECRET}
+#            redirect-uri: ${FACEBOOK_REDIRECT_URI}
+#            scope: public_profile, email
+#
+#          github:
+#            client-id: ${GITHUB_CLIENT_ID}
+#            client-secret: ${GITHUB_CLIENT_SECRET}
+#            redirect-uri: ${GITHUB_REDIRECT_URI}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: startup_crm_db  # just to refer for native quries
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "anandshaha8825@gmail.com"
+    password: "ndawiqfquciifcqv"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+  secretKey: RDrloZ1Rz7vkPjnnLG3VrG+KmkXQbbHvrKlrYfwPgCM=
+  expirationMs: 3600000  # Token expiration in milliseconds (1 hour)
+  refreshExpirationMs: 86400000  # Refresh token expiration (24 hours)
+
