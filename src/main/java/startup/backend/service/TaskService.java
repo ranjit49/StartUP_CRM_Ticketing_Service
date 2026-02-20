@@ -112,6 +112,11 @@ public class TaskService {
     // ---------------- MAPPER ----------------
 
     private TaskResponse mapToResponse(Task task) {
+		List<Task> childTasks = taskRepository.findByParentId(task.getId());
+
+        List<TaskResponse> childResponses = childTasks.stream()
+                .map(this::mapToResponse) 
+                .toList()
         return TaskResponse.builder()
                 .id(task.getId())
                 .parentId(task.getParentId())
@@ -124,6 +129,7 @@ public class TaskService {
                 .createdBy(task.getCreatedBy())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
+			    .children(childResponses)
                 .build();
     }
 }
