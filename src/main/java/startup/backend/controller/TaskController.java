@@ -10,6 +10,7 @@ import startup.backend.dto.TaskResponse;
 import startup.backend.service.TaskService;
 
 import java.util.List;
+import java.util.Map; 
 
 @RestController
 @RequestMapping("/ticket-tasks")
@@ -59,6 +60,35 @@ public class TaskController {
 
         return ResponseEntity.badRequest().build();
     }
+	@PatchMapping("/{id}/status")
+    public ResponseEntity<TaskResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String status = body.get("status");
+
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        TaskResponse response = taskService.updateTaskStatus(id, status);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<TaskResponse> assignTask(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> body) {
+
+        Long assignedTo = body.get("assignedTo");
+
+        if (assignedTo == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        TaskResponse response = taskService.assignTask(id, assignedTo);
+        return ResponseEntity.ok(response);
+    }
 
     // ---------------- HELPER ----------------
 
@@ -69,4 +99,5 @@ public class TaskController {
 
         return (Long) principal;
     }
+
 }

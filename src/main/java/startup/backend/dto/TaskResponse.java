@@ -7,6 +7,7 @@ import startup.backend.enums.TaskStatus;
 import startup.backend.enums.TaskType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,4 +24,5 @@ public class TaskResponse {
     private Long createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+	private List<TaskResponse> children;
 }

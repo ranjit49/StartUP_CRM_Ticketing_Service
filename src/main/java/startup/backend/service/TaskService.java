@@ -7,6 +7,8 @@ import startup.backend.dto.CreateTaskRequest;
 import startup.backend.dto.TaskResponse;
 import startup.backend.entity.Task;
 import startup.backend.repository.TaskRepository;
+import startup.backend.enums.TaskStatus;              
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+	private final TaskLifecycleService lifecycleService;  // >>> ADDED
+
 
     // ---------------- CREATE TASK ----------------
 
@@ -51,6 +55,36 @@ public class TaskService {
 
         return mapToResponse(task);
     }
+	@Transactional
+    public TaskResponse updateTaskStatus(Long taskId, String status) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        TaskStatus newStatus;
+
+        try {
+            newStatus = TaskStatus.valueOf(status);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid status value: " + status);
+        }
+
+        lifecycleService.changeStatus(task, newStatus);
+
+        Task saved = taskRepository.save(task);
+        return mapToResponse(saved);
+    }
+	 @Transactional
+    public TaskResponse assignTask(Long taskId, Long assignedTo) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        lifecycleService.assignTask(task, assignedTo);
+
+        Task saved = taskRepository.save(task);
+        return mapToResponse(saved);
+    }
 
     // ---------------- GET CHILD TASKS ----------------
 
@@ -78,6 +112,11 @@ public class TaskService {
     // ---------------- MAPPER ----------------
 
     private TaskResponse mapToResponse(Task task) {
+		List<Task> childTasks = taskRepository.findByParentId(task.getId());
+
+        List<TaskResponse> childResponses = childTasks.stream()
+                .map(this::mapToResponse) 
+                .toList()
         return TaskResponse.builder()
                 .id(task.getId())
                 .parentId(task.getParentId())
@@ -90,6 +129,7 @@ public class TaskService {
                 .createdBy(task.getCreatedBy())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
+			    .children(childResponses)
                 .build();
     }
 }
