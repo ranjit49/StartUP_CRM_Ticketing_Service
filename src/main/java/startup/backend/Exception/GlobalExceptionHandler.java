@@ -16,6 +16,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleTaskLifecycleException(TaskLifecycleException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getErrorType().name());
     }
+	 @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), "INTERNAL_SERVER_ERROR");
+    }
 
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message, String error) {
         Map<String, Object> response = new LinkedHashMap<>();
