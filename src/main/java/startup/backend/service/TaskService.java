@@ -3,6 +3,7 @@ package startup.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startup.backend.Exception.TaskLifecycleException;
 import startup.backend.dto.CreateTaskRequest;
 import startup.backend.dto.TaskResponse;
 import startup.backend.entity.Task;
@@ -29,7 +30,7 @@ public class TaskService {
         // Validate parent if present
         if (request.getParentId() != null) {
             taskRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new RuntimeException("Parent task not found"));
+                    .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Parent task not found"));
         }
         System.out.println(userId);
 
@@ -51,7 +52,7 @@ public class TaskService {
 
     public TaskResponse getTaskById(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found with ID: " + id));
 
         return mapToResponse(task);
     }
@@ -59,14 +60,14 @@ public class TaskService {
     public TaskResponse updateTaskStatus(Long taskId, String status) {
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found"));
 
         TaskStatus newStatus;
 
         try {
             newStatus = TaskStatus.valueOf(status);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid status value: " + status);
+            throw TaskLifecycleException.invalidStatusTransition(task.getStatus(), null);
         }
 
         lifecycleService.changeStatus(task, newStatus);
@@ -78,7 +79,7 @@ public class TaskService {
     public TaskResponse assignTask(Long taskId, Long assignedTo) {
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found"));
 
         lifecycleService.assignTask(task, assignedTo);
 
@@ -91,7 +92,7 @@ public class TaskService {
     public List<TaskResponse> getChildTasks(Long parentId) {
 
         if (!taskRepository.existsById(parentId)) {
-            throw new RuntimeException("Parent task not found");
+            throw TaskLifecycleException.taskAlreadyClosed("Parent task not found");
         }
 
         return taskRepository.findByParentId(parentId)
@@ -116,7 +117,7 @@ public class TaskService {
 
         List<TaskResponse> childResponses = childTasks.stream()
                 .map(this::mapToResponse) 
-                .toList()
+                .toList();
         return TaskResponse.builder()
                 .id(task.getId())
                 .parentId(task.getParentId())
