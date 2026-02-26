@@ -16,6 +16,27 @@ spring:
       ddl-auto: update
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        default_schema: startup_crm_db  # just to refer for native quries
+
+
+  servlet:
+     multipart:
+     max-file-size: 50MB
+     max-request-size: 50MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "anandshaha8825@gmail.com"
+    password: "ndawiqfquciifcqv"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 eureka:
   client:
@@ -31,10 +52,7 @@ logging:
 
 
 
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+
 
 #  security:
 #    oauth2:
@@ -59,26 +77,16 @@ logging:
 #            client-secret: ${GITHUB_CLIENT_SECRET}
 #            redirect-uri: ${GITHUB_REDIRECT_URI}
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    open-in-view: false
-    properties:
-      hibernate:
-        default_schema: startup_crm_db  # just to refer for native quries
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: false
+#    open-in-view: false
+#    properties:
+#      hibernate:
+#        default_schema: startup_crm_db  # just to refer for native quries
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: "anandshaha8825@gmail.com"
-    password: "ndawiqfquciifcqv"
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 
 jwt:
   secretKey: RDrloZ1Rz7vkPjnnLG3VrG+KmkXQbbHvrKlrYfwPgCM=

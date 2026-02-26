@@ -9,6 +9,7 @@ import startup.backend.dto.AddMessageRequest;
 import startup.backend.dto.MessageResponse;
 import startup.backend.entity.Task;
 import startup.backend.entity.TaskMessage;
+import startup.backend.enums.NotificationType;
 import startup.backend.enums.TaskStatus;
 import startup.backend.repository.TaskMessageRepository;
 import startup.backend.repository.TaskRepository;
@@ -23,7 +24,7 @@ public class TaskMessageService {
 
     private final TaskRepository taskRepository;
     private final TaskMessageRepository taskMessageRepository;
-
+    private final NotificationService notificationService;
     // ---------------- ADD COMMENT ----------------
 
     public MessageResponse addMessage(Long taskId, AddMessageRequest request, Long senderId) {
@@ -44,6 +45,14 @@ public class TaskMessageService {
                 .build();
 
         TaskMessage saved = taskMessageRepository.save(message);
+        notificationService.createNotification(
+                task.getAssignedTo(),
+                task.getId(),
+                "New comment added on task: " + task.getTitle(),
+                NotificationType.COMMENT_ADDED,
+                "rushisonar90@gmail.com"
+        );
+
 
         return mapToResponse(saved);
     }

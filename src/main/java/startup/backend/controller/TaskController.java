@@ -66,12 +66,13 @@ public class TaskController {
             @RequestBody Map<String, String> body) {
 
         String status = body.get("status");
+        long taskId = Long.parseLong(body.get("taskId"));
 
         if (status == null || status.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        TaskResponse response = taskService.updateTaskStatus(id, status);
+        TaskResponse response = taskService.updateTaskStatus(id, taskId, status);
         return ResponseEntity.ok(response);
     }
 
@@ -87,6 +88,7 @@ public class TaskController {
         }
 
         TaskResponse response = taskService.assignTask(id, assignedTo);
+
         return ResponseEntity.ok(response);
     }
 
