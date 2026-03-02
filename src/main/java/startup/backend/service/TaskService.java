@@ -3,12 +3,14 @@ package startup.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startup.backend.Exception.CustomAccessDeniedException;
 import startup.backend.Exception.TaskLifecycleException;
 import startup.backend.dto.CreateTaskRequest;
 import startup.backend.dto.TaskResponse;
 import startup.backend.entity.Task;
+import startup.backend.enums.NotificationType;
 import startup.backend.repository.TaskRepository;
-import startup.backend.enums.TaskStatus;              
+import startup.backend.enums.TaskStatus;
 
 
 import java.util.List;
@@ -21,7 +23,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 	private final TaskLifecycleService lifecycleService;  // >>> ADDED
-
+    private final NotificationService notificationService;
 
     // ---------------- CREATE TASK ----------------
 
@@ -32,7 +34,6 @@ public class TaskService {
             taskRepository.findById(request.getParentId())
                     .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Parent task not found"));
         }
-        System.out.println(userId);
 
         Task task = Task.builder()
                 .title(request.getTitle())
@@ -57,7 +58,7 @@ public class TaskService {
         return mapToResponse(task);
     }
 	@Transactional
-    public TaskResponse updateTaskStatus(Long taskId, String status) {
+    public TaskResponse updateTaskStatus(Long id, Long taskId, String status) {
 
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found"));
@@ -71,8 +72,20 @@ public class TaskService {
         }
 
         lifecycleService.changeStatus(task, newStatus);
+        if (task.getAssignedTo().equals(null)) {
+            throw new CustomAccessDeniedException(
+                    "You are not allowed to modify this status until you assign this task"
+            );
+        }
 
         Task saved = taskRepository.save(task);
+        notificationService.createNotification(
+                task.getAssignedTo(),
+                task.getId(),
+                "Task status updated to: " + task.getStatus(),
+                NotificationType.STATUS_CHANGED,
+                ""
+        );
         return mapToResponse(saved);
     }
 	 @Transactional
@@ -84,7 +97,14 @@ public class TaskService {
         lifecycleService.assignTask(task, assignedTo);
 
         Task saved = taskRepository.save(task);
-        return mapToResponse(saved);
+         notificationService.createNotification(
+                 assignedTo,
+                 task.getId(),
+                 "You have been assigned to task: " + task.getTitle(),
+                 NotificationType.TASK_ASSIGNED,
+                 ""
+         );
+         return mapToResponse(saved);
     }
 
     // ---------------- GET CHILD TASKS ----------------
@@ -116,7 +136,7 @@ public class TaskService {
 		List<Task> childTasks = taskRepository.findByParentId(task.getId());
 
         List<TaskResponse> childResponses = childTasks.stream()
-                .map(this::mapToResponse) 
+                .map(this::mapToResponse)
                 .toList();
         return TaskResponse.builder()
                 .id(task.getId())

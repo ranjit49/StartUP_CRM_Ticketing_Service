@@ -102,3 +102,13 @@ public class TaskLifecycleService {
     }
 
 }
+
+/*
+* | Current Status | Can Move To          |
+| -------------- | -------------------- |
+| OPEN           | IN_PROGRESS, BLOCKED |
+| BLOCKED        | IN_PROGRESS          |
+| IN_PROGRESS    | RESOLVED             |
+| RESOLVED       | CLOSED               |
+| CLOSED         | ❌ nothing            |
+*/
