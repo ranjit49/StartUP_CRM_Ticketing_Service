@@ -29,18 +29,20 @@ public class TaskService {
 
     public TaskResponse createTask(CreateTaskRequest request, Long userId) {
 
-        // Validate parent if present
+        Task parent = null;
+
         if (request.getParentId() != null) {
-            taskRepository.findById(request.getParentId())
-                    .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Parent task not found"));
+            parent = taskRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent task not found"));
         }
 
         Task task = Task.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .priority(request.getPriority())
+                .status(request.getStatus())
                 .type(request.getType())
-                .parentId(request.getParentId())
+                .parentId(parent != null ? parent.getId() : null)
                 .createdBy(userId)
                 .build();
 

@@ -33,7 +33,7 @@ public class TaskMessageService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found with ID: " + taskId));
 
-        if (task.getStatus() == TaskStatus.CLOSED) {
+        if (task.getStatus() == TaskStatus.COMPLETE) {
             throw TaskLifecycleException.taskAlreadyClosed("Cannot add messages to a CLOSED task");
         }
 

@@ -89,7 +89,7 @@ logging:
 
 
 jwt:
-  secretKey: RDrloZ1Rz7vkPjnnLG3VrG+KmkXQbbHvrKlrYfwPgCM=
+  secretKey: 18VB0K2YVpMYWFgmECKFtUcWzrhhf8mEF0webJMDXJc=
   expirationMs: 3600000  # Token expiration in milliseconds (1 hour)
   refreshExpirationMs: 86400000  # Refresh token expiration (24 hours)
 

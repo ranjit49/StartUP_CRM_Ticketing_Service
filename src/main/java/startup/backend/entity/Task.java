@@ -55,7 +55,9 @@ public class Task {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.status = TaskStatus.OPEN;
+        if (this.status == null) {
+            this.status = TaskStatus.TO_DO;
+        }
     }
 
     @PreUpdate

@@ -1,4 +1,3 @@
-
 package startup.backend.config;
 
 import lombok.RequiredArgsConstructor;
@@ -18,65 +17,89 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity()
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
-    /**
-     * Custom user details service for managing user-related data.
-     */
-    //private final CustomUserDetailsServiceImpl customUserDetailsService;
-
-    /**
-     * Filter to handle JWT authentication requests.
-     */
     private final JwtRequestFilter jwtRequestFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-
-
+    // ✅ MAIN SECURITY CONFIG
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                //.cors(Customizer.withDefaults())
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
+
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // ⚠️ Allow preflight
-                        .requestMatchers("/**").hasAnyRole("USER", "ADMIN", "INSTRUCTOR", "ORG","MGR")
+                        // ✅ allow preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ✅ public auth APIs
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // ✅ ticket module security
+                        .requestMatchers("/ticket-tasks/**")
+                        .hasAnyRole("USER", "ADMIN", "ORG", "MGR")
+
+                        // ✅ everything else needs auth
                         .anyRequest().authenticated()
                 )
-               // .userDetailsService(customUserDetailsService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                        .accessDeniedHandler(customAccessDeniedHandler))
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+                        )
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
+
                 .build();
     }
 
-    /**
-     * Provides a password encoder for hashing passwords using BCrypt.
-     *
-     * @return a BCryptPasswordEncoder instance
-     */
+    // ✅ PASSWORD ENCODER
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configures the authentication manager from the provided configuration.
-     *
-     * @param configuration the authentication configuration
-     * @return the configured authentication manager
-     * @throws Exception if any error occurs during configuration
-     */
+    // ✅ AUTH MANAGER
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration
+    ) throws Exception {
         return configuration.getAuthenticationManager();
+    }
+
+    // ✅ CORS CONFIG
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

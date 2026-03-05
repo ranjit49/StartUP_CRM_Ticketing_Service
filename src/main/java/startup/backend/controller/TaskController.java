@@ -3,6 +3,7 @@ package startup.backend.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import startup.backend.dto.CreateTaskRequest;
@@ -95,11 +96,30 @@ public class TaskController {
     // ---------------- HELPER ----------------
 
     private Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
 
-        return (Long) principal;
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        // principal is username (String)
+        String username = authentication.getPrincipal().toString();
+
+        // extract userId from JWT claims
+        Object idObj = ((io.jsonwebtoken.Claims)
+                authentication.getDetails()).get("id");
+
+        if (idObj instanceof Integer) {
+            return ((Integer) idObj).longValue();
+        }
+
+        if (idObj instanceof Long) {
+            return (Long) idObj;
+        }
+
+        throw new RuntimeException("User ID not found in token");
     }
 
 }

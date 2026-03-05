@@ -19,7 +19,7 @@ public class TaskLifecycleService {
 
     public void changeStatus(Task task, TaskStatus newStatus) {
 
-        if (task.getStatus() == TaskStatus.CLOSED) {
+        if (task.getStatus() == TaskStatus.COMPLETE) {
 
             throw TaskLifecycleException.taskAlreadyClosed("Closed task cannot be modified");
         }
@@ -27,7 +27,7 @@ public class TaskLifecycleService {
         validateTransition(task.getStatus(), newStatus);
 
         // Parent closing rule
-        if (newStatus == TaskStatus.CLOSED) {
+        if (newStatus == TaskStatus.COMPLETE) {
             validateChildrenClosed(task.getId());
         }
 
@@ -38,7 +38,7 @@ public class TaskLifecycleService {
 
     public void assignTask(Task task, Long userId) {
 
-        if (task.getStatus() == TaskStatus.CLOSED) {
+        if (task.getStatus() == TaskStatus.COMPLETE) {
 
             throw TaskLifecycleException.taskAlreadyClosed("Cannot assign a CLOSED task");
         }
@@ -51,7 +51,7 @@ public class TaskLifecycleService {
     private void validateTransition(TaskStatus current, TaskStatus target) {
 
         boolean valid = switch (current) {
-            case OPEN ->
+            case TO_DO ->
                     target == TaskStatus.IN_PROGRESS ||
                             target == TaskStatus.BLOCKED;
 

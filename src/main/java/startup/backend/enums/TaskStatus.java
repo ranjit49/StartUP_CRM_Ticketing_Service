@@ -1,9 +1,8 @@
 package startup.backend.enums;
 
 public enum TaskStatus {
-    OPEN,
+    TO_DO,
     IN_PROGRESS,
-    BLOCKED,
-    RESOLVED,
-    CLOSED
+    IN_REVIEW,
+    COMPLETE
 }
