@@ -53,16 +53,13 @@ public class TaskLifecycleService {
         boolean valid = switch (current) {
             case TO_DO ->
                     target == TaskStatus.IN_PROGRESS ||
-                            target == TaskStatus.BLOCKED;
-
-            case BLOCKED ->
-                    target == TaskStatus.IN_PROGRESS;
+                            target == TaskStatus.IN_PROGRESS;
 
             case IN_PROGRESS ->
-                    target == TaskStatus.RESOLVED;
+                    target == TaskStatus.IN_REVIEW;
 
-            case RESOLVED ->
-                    target == TaskStatus.CLOSED;
+            case IN_REVIEW ->
+                    target == TaskStatus.COMPLETE;
 
             default -> false;
         };
@@ -88,7 +85,7 @@ public class TaskLifecycleService {
         for (Task child : children) {
 
             // If this child itself is not closed → stop
-            if (child.getStatus() != TaskStatus.CLOSED) {
+            if (child.getStatus() != TaskStatus.COMPLETE) {
                 return true;
             }
 
@@ -102,13 +99,3 @@ public class TaskLifecycleService {
     }
 
 }
-
-/*
-* | Current Status | Can Move To          |
-| -------------- | -------------------- |
-| OPEN           | IN_PROGRESS, BLOCKED |
-| BLOCKED        | IN_PROGRESS          |
-| IN_PROGRESS    | RESOLVED             |
-| RESOLVED       | CLOSED               |
-| CLOSED         | ❌ nothing            |
-*/

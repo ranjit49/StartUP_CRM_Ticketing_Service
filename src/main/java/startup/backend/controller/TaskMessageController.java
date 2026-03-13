@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/ticket-tasks/{taskId}/messages")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class TaskMessageController {
 
     private final TaskMessageService taskMessageService;

@@ -30,6 +30,7 @@ public class TaskService {
     public TaskResponse createTask(CreateTaskRequest request, Long userId) {
 
         Task parent = null;
+        System.out.println("createTask api (TaskService.java) is started !");
 
         if (request.getParentId() != null) {
             parent = taskRepository.findById(request.getParentId())
@@ -38,7 +39,7 @@ public class TaskService {
 
         Task task = Task.builder()
                 .title(request.getTitle())
-                .description(request.getDescription())
+                .description("")
                 .priority(request.getPriority())
                 .status(request.getStatus())
                 .type(request.getType())
@@ -47,6 +48,7 @@ public class TaskService {
                 .build();
 
         Task saved = taskRepository.save(task);
+        System.out.println("createTask api (TaskService.java) is at the end !");
 
         return mapToResponse(saved);
     }
@@ -54,14 +56,15 @@ public class TaskService {
     // ---------------- GET BY ID ----------------
 
     public TaskResponse getTaskById(Long id) {
+        System.out.println("getTaskById api (TaskService.java) is started !");
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found with ID: " + id));
-
+        System.out.println("getTaskById api (TaskService.java) is ended !");
         return mapToResponse(task);
     }
 	@Transactional
     public TaskResponse updateTaskStatus(Long id, Long taskId, String status) {
-
+        System.out.println("updateTaskStatus api (TaskService.java) is started !");
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found"));
 
@@ -88,11 +91,12 @@ public class TaskService {
                 NotificationType.STATUS_CHANGED,
                 ""
         );
+        System.out.println("updateTaskStatus api (TaskService.java) is ended !");
         return mapToResponse(saved);
     }
 	 @Transactional
     public TaskResponse assignTask(Long taskId, Long assignedTo) {
-
+         System.out.println("assignTask api (TaskService.java) is started !");
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> TaskLifecycleException.taskAlreadyClosed("Task not found"));
 
@@ -106,17 +110,19 @@ public class TaskService {
                  NotificationType.TASK_ASSIGNED,
                  ""
          );
+         System.out.println("assignTask api (TaskService.java) is ended !");
          return mapToResponse(saved);
     }
 
     // ---------------- GET CHILD TASKS ----------------
 
     public List<TaskResponse> getChildTasks(Long parentId) {
+        System.out.println("getChildTasks api (TaskService.java) is ended !");
 
         if (!taskRepository.existsById(parentId)) {
             throw TaskLifecycleException.taskAlreadyClosed("Parent task not found");
         }
-
+        System.out.println("getChildTasks api (TaskService.java) is ended !");
         return taskRepository.findByParentId(parentId)
                 .stream()
                 .map(this::mapToResponse)
