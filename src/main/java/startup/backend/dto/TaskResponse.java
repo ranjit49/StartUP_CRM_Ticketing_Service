@@ -5,7 +5,7 @@ import lombok.Data;
 import startup.backend.enums.TaskPriority;
 import startup.backend.enums.TaskStatus;
 import startup.backend.enums.TaskType;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,6 +18,7 @@ public class TaskResponse {
     private String title;
     private String description;
     private TaskStatus status;
+    private LocalDate dueDate;
     private TaskPriority priority;
     private TaskType type;
     private Long assignedTo;
