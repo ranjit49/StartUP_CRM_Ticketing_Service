@@ -2,11 +2,14 @@ package startup.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import startup.backend.enums.TaskPriority;
 import startup.backend.enums.TaskStatus;
 import startup.backend.enums.TaskType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "task")
@@ -37,6 +40,9 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
+    @Column(nullable = false)
+    private LocalDate dueDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskPriority priority;
@@ -55,7 +61,9 @@ public class Task {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.status = TaskStatus.OPEN;
+        if (this.status == null) {
+            this.status = TaskStatus.TO_DO;
+        }
     }
 
     @PreUpdate

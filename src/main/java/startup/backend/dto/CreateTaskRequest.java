@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import startup.backend.enums.TaskPriority;
 import startup.backend.enums.TaskType;
+import startup.backend.enums.TaskStatus;
+import java.time.LocalDate;
 
 @Data
 public class CreateTaskRequest {
@@ -16,6 +18,12 @@ public class CreateTaskRequest {
 
     @NotNull(message = "Priority is mandatory")
     private TaskPriority priority;
+
+    @NotNull(message = "Task Status")
+    private TaskStatus status;
+
+    @NotNull(message = "due_date")
+    private LocalDate dueDate;
 
     @NotNull(message = "Type is mandatory")
     private TaskType type;

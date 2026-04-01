@@ -3,21 +3,29 @@ package startup.backend.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import startup.backend.dto.CreateTaskRequest;
 import startup.backend.dto.TaskResponse;
 import startup.backend.service.TaskService;
+import startup.backend.client.AuthServiceClient;
+import startup.backend.dto.ApiResponse;
+import startup.backend.dto.UserListResponse;
+import startup.backend.dto.UserResponse;
 
 import java.util.List;
-import java.util.Map; 
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ticket-tasks")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class TaskController {
 
     private final TaskService taskService;
+    private final AuthServiceClient authServiceClient;
 
     // ---------------- CREATE ----------------
 
@@ -92,14 +100,61 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<List<UserListResponse>> getAllUsers() {
+        try {
+            ApiResponse<List<UserResponse>> response = authServiceClient.getAllUsers();
+            if (response == null || response.getData() == null) {
+                return ResponseEntity.ok(List.of());
+            }
+            List<UserListResponse> users = response.getData()
+                    .stream()
+                    .map(u -> {
+                        String firstName = u.getFirstName() != null ? u.getFirstName() : "";
+                        String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
+                        String fullName  = (firstName + " " + lastName).trim();
+                        return UserListResponse.builder()
+                                .id(u.getId())
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .fullName(fullName.isBlank() ? u.getUsername() : fullName)
+                                .username(u.getUsername())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.ok(List.of());
+        }
+    }
+
     // ---------------- HELPER ----------------
 
     private Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
 
-        return (Long) principal;
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        // principal is username (String)
+        String username = authentication.getPrincipal().toString();
+
+        // extract userId from JWT claims
+        Object idObj = ((io.jsonwebtoken.Claims)
+                authentication.getDetails()).get("id");
+
+        if (idObj instanceof Integer) {
+            return ((Integer) idObj).longValue();
+        }
+
+        if (idObj instanceof Long) {
+            return (Long) idObj;
+        }
+
+        throw new RuntimeException("User ID not found in token");
     }
 
 }

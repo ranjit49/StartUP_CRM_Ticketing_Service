@@ -19,7 +19,7 @@ public class TaskLifecycleService {
 
     public void changeStatus(Task task, TaskStatus newStatus) {
 
-        if (task.getStatus() == TaskStatus.CLOSED) {
+        if (task.getStatus() == TaskStatus.COMPLETE) {
 
             throw TaskLifecycleException.taskAlreadyClosed("Closed task cannot be modified");
         }
@@ -27,7 +27,7 @@ public class TaskLifecycleService {
         validateTransition(task.getStatus(), newStatus);
 
         // Parent closing rule
-        if (newStatus == TaskStatus.CLOSED) {
+        if (newStatus == TaskStatus.COMPLETE) {
             validateChildrenClosed(task.getId());
         }
 
@@ -38,7 +38,7 @@ public class TaskLifecycleService {
 
     public void assignTask(Task task, Long userId) {
 
-        if (task.getStatus() == TaskStatus.CLOSED) {
+        if (task.getStatus() == TaskStatus.COMPLETE) {
 
             throw TaskLifecycleException.taskAlreadyClosed("Cannot assign a CLOSED task");
         }
@@ -51,18 +51,15 @@ public class TaskLifecycleService {
     private void validateTransition(TaskStatus current, TaskStatus target) {
 
         boolean valid = switch (current) {
-            case OPEN ->
+            case TO_DO ->
                     target == TaskStatus.IN_PROGRESS ||
-                            target == TaskStatus.BLOCKED;
-
-            case BLOCKED ->
-                    target == TaskStatus.IN_PROGRESS;
+                            target == TaskStatus.IN_PROGRESS;
 
             case IN_PROGRESS ->
-                    target == TaskStatus.RESOLVED;
+                    target == TaskStatus.IN_REVIEW;
 
-            case RESOLVED ->
-                    target == TaskStatus.CLOSED;
+            case IN_REVIEW ->
+                    target == TaskStatus.COMPLETE;
 
             default -> false;
         };
@@ -88,7 +85,7 @@ public class TaskLifecycleService {
         for (Task child : children) {
 
             // If this child itself is not closed → stop
-            if (child.getStatus() != TaskStatus.CLOSED) {
+            if (child.getStatus() != TaskStatus.COMPLETE) {
                 return true;
             }
 
@@ -102,13 +99,3 @@ public class TaskLifecycleService {
     }
 
 }
-
-/*
-* | Current Status | Can Move To          |
-| -------------- | -------------------- |
-| OPEN           | IN_PROGRESS, BLOCKED |
-| BLOCKED        | IN_PROGRESS          |
-| IN_PROGRESS    | RESOLVED             |
-| RESOLVED       | CLOSED               |
-| CLOSED         | ❌ nothing            |
-*/

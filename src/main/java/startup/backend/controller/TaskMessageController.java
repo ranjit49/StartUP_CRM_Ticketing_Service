@@ -1,8 +1,10 @@
 package startup.backend.controller;
 
+import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import startup.backend.dto.AddMessageRequest;
@@ -14,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/ticket-tasks/{taskId}/messages")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class TaskMessageController {
 
     private final TaskMessageService taskMessageService;
@@ -47,9 +50,23 @@ public class TaskMessageController {
     // ---------------- HELPER ----------------
 
     private Long getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        return (Long) principal;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        // ✅ Details holds the JWT Claims object — same pattern as TaskController
+        Object details = authentication.getDetails();
+        if (!(details instanceof Claims claims)) {
+            throw new RuntimeException("JWT claims not found in authentication details");
+        }
+
+        Object idObj = claims.get("id");
+        if (idObj instanceof Integer i) return i.longValue();
+        if (idObj instanceof Long l)    return l;
+        if (idObj instanceof String s)  return Long.parseLong(s);
+
+        throw new RuntimeException("User ID not found in token");
     }
 }
