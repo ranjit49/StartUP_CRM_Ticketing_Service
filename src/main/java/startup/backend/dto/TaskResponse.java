@@ -21,8 +21,10 @@ public class TaskResponse {
     private TaskPriority priority;
     private TaskType type;
     private Long assignedTo;
+    private String assignedToName;   // ✅ ADDED
     private Long createdBy;
+    private String createdByName;    // ✅ ADDED
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-	private List<TaskResponse> children;
+    private List<TaskResponse> children;
 }

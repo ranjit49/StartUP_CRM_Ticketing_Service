@@ -89,7 +89,10 @@ logging:
 
 
 jwt:
-  secretKey: RDrloZ1Rz7vkPjnnLG3VrG+KmkXQbbHvrKlrYfwPgCM=
+  secretKey: IQpi640zpxAMDcIQn/wjZ6dhhIkrKVsbkIuw/xUsHVk=
   expirationMs: 3600000  # Token expiration in milliseconds (1 hour)
   refreshExpirationMs: 86400000  # Refresh token expiration (24 hours)
 
+auth:
+  service:
+    url: http://localhost:8080

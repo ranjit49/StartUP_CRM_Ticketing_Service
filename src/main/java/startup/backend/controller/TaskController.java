@@ -9,9 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import startup.backend.dto.CreateTaskRequest;
 import startup.backend.dto.TaskResponse;
 import startup.backend.service.TaskService;
+import startup.backend.client.AuthServiceClient;
+import startup.backend.dto.ApiResponse;
+import startup.backend.dto.UserListResponse;
+import startup.backend.dto.UserResponse;
 
 import java.util.List;
-import java.util.Map; 
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ticket-tasks")
@@ -20,6 +25,7 @@ import java.util.Map;
 public class TaskController {
 
     private final TaskService taskService;
+    private final AuthServiceClient authServiceClient;
 
     // ---------------- CREATE ----------------
 
@@ -92,6 +98,34 @@ public class TaskController {
         TaskResponse response = taskService.assignTask(id, assignedTo);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserListResponse>> getAllUsers() {
+        try {
+            ApiResponse<List<UserResponse>> response = authServiceClient.getAllUsers();
+            if (response == null || response.getData() == null) {
+                return ResponseEntity.ok(List.of());
+            }
+            List<UserListResponse> users = response.getData()
+                    .stream()
+                    .map(u -> {
+                        String firstName = u.getFirstName() != null ? u.getFirstName() : "";
+                        String lastName  = u.getLastName()  != null ? u.getLastName()  : "";
+                        String fullName  = (firstName + " " + lastName).trim();
+                        return UserListResponse.builder()
+                                .id(u.getId())
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .fullName(fullName.isBlank() ? u.getUsername() : fullName)
+                                .username(u.getUsername())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.ok(List.of());
+        }
     }
 
     // ---------------- HELPER ----------------
