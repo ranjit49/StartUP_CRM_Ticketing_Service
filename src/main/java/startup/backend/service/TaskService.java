@@ -46,6 +46,7 @@ public class TaskService {
                 .type(request.getType())
                 .parentId(parent != null ? parent.getId() : null)
                 .createdBy(userId)
+                .assignedTo(request.getAssignedTo())
                 .build();
 
         Task saved = taskRepository.save(task);
@@ -113,6 +114,21 @@ public class TaskService {
          );
          System.out.println("assignTask api (TaskService.java) is ended !");
          return mapToResponse(saved);
+    }
+
+    //-------------------Delete Task ------------------
+
+    public void deleteTask(Long id, Long userId) {
+
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        // optional: creator check
+        if (!task.getCreatedBy().equals(userId)) {
+            throw new RuntimeException("You are not allowed to delete this task");
+        }
+
+        taskRepository.delete(task); // ✅ CORRECT
     }
 
     // ---------------- GET CHILD TASKS ----------------
