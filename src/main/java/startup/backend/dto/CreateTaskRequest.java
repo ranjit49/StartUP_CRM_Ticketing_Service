@@ -29,4 +29,6 @@ public class CreateTaskRequest {
     private TaskType type;
 
     private Long parentId; // null = root
+
+    private Long assignedTo;
 }
