@@ -12,5 +12,6 @@ public class TeamOverviewResponse {
     private long totalAssignedTasks;
     private long openTasksCount;
     private long inProgressTasksCount;
+    private long inReviewTasksCount;
     private long completedTasksCount;
 }

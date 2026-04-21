@@ -128,6 +128,12 @@ public class TaskController {
                                 .lastName(lastName)
                                 .fullName(fullName.isBlank() ? u.getUsername() : fullName)
                                 .username(u.getUsername())
+                                .status(u.getStatus())
+                                .email(u.getEmail())           // ✅ add
+                                .bio(u.getBio())               // ✅ add
+                                .location(u.getLocation())     // ✅ add
+                                .mobileNo(u.getMobileNo())     // ✅ add
+                                .roles(u.getRoles())           // ✅ add
                                 .build();
                     })
                     .collect(Collectors.toList());

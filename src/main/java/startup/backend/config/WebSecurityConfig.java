@@ -47,8 +47,11 @@ public class WebSecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         // ✅ ticket module security
-                        .requestMatchers("/ticket-tasks/**")
+                        .requestMatchers("/ticket-tasks/**", "/chat/**")
                         .hasAnyRole("USER", "ADMIN", "ORG", "MGR")
+
+//                        .requestMatchers("/ticket-tasks/**", "/chat/**")
+//                        .hasAnyAuthority("USER", "ADMIN", "ORG", "MGR", "INSTRUCTOR")
 
                         // ✅ everything else needs auth
                         .anyRequest().authenticated()

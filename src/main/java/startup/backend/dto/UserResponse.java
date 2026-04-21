@@ -18,5 +18,6 @@ public class UserResponse {
     private String bio;
     private String location;
     private LocalDateTime createdAt;
+    private String status;
 
 }

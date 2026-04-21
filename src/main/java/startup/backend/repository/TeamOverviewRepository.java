@@ -21,6 +21,7 @@ public class TeamOverviewRepository {
                             COUNT(t.id) AS totalAssignedTasks,
                             SUM(CASE WHEN t.status <> startup.backend.enums.TaskStatus.COMPLETE THEN 1 ELSE 0 END) AS openTasksCount,
                             SUM(CASE WHEN t.status = startup.backend.enums.TaskStatus.IN_PROGRESS THEN 1 ELSE 0 END) AS inProgressTasksCount,
+                            SUM(CASE WHEN t.status = startup.backend.enums.TaskStatus.IN_REVIEW THEN 1 ELSE 0 END) AS inReviewTasksCount,
                             SUM(CASE WHEN t.status = startup.backend.enums.TaskStatus.COMPLETE THEN 1 ELSE 0 END) AS completedTasksCount
                         FROM Task t
                         WHERE t.assignedTo IS NOT NULL
