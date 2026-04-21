@@ -116,6 +116,20 @@ public class TaskService {
          return mapToResponse(saved);
     }
 
+    public List<TaskResponse> getTasksAssignedToMe(Long userId) {
+
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
+        List<Task> tasks = taskRepository
+                .findByAssignedToAndParentIdIsNull(userId);
+
+        return tasks.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     //-------------------Delete Task ------------------
 
     public void deleteTask(Long id, Long userId) {
@@ -128,7 +142,7 @@ public class TaskService {
             throw new RuntimeException("You are not allowed to delete this task");
         }
 
-        taskRepository.delete(task); // ✅ CORRECT
+        taskRepository.delete(task);
     }
 
     // ---------------- GET CHILD TASKS ----------------

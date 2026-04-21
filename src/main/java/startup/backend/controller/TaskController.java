@@ -63,6 +63,12 @@ public class TaskController {
         return ResponseEntity.badRequest().build();
     }
 
+    @GetMapping("/assigned-to-me")
+    public ResponseEntity<List<TaskResponse>> getAssignedToMeTasks() {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(taskService.getTasksAssignedToMe(userId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         Long userId = getCurrentUserId();
