@@ -13,6 +13,6 @@ public class NotificationResponse {
     private Long taskId;
     private String message;
     private NotificationType type;
-    private boolean isRead;
+    private Boolean isRead;
     private LocalDateTime createdAt;
 }
