@@ -57,6 +57,7 @@ public class TeamOverviewService {
                 .totalAssignedTasks(getLong(tuple, "totalAssignedTasks"))
                 .openTasksCount(getLong(tuple, "openTasksCount"))
                 .inProgressTasksCount(getLong(tuple, "inProgressTasksCount"))
+                .inReviewTasksCount(getLong(tuple, "inReviewTasksCount"))
                 .completedTasksCount(getLong(tuple, "completedTasksCount"))
                 .build();
     }

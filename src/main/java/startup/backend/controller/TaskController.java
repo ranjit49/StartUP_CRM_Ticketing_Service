@@ -68,6 +68,21 @@ public class TaskController {
 
         return ResponseEntity.badRequest().build();
     }
+
+    @GetMapping("/assigned-to-me")
+    public ResponseEntity<List<TaskResponse>> getAssignedToMeTasks() {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(taskService.getTasksAssignedToMe(userId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        Long userId = getCurrentUserId();
+
+        taskService.deleteTask(id, userId);
+        return ResponseEntity.ok().build();
+    }
+
 	@PatchMapping("/{id}/status")
     public ResponseEntity<TaskResponse> updateStatus(
             @PathVariable Long id,
@@ -119,6 +134,12 @@ public class TaskController {
                                 .lastName(lastName)
                                 .fullName(fullName.isBlank() ? u.getUsername() : fullName)
                                 .username(u.getUsername())
+                                .status(u.getStatus())
+                                .email(u.getEmail())           // ✅ add
+                                .bio(u.getBio())               // ✅ add
+                                .location(u.getLocation())     // ✅ add
+                                .mobileNo(u.getMobileNo())     // ✅ add
+                                .roles(u.getRoles())           // ✅ add
                                 .build();
                     })
                     .collect(Collectors.toList());
